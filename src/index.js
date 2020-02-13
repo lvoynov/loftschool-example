@@ -9,6 +9,7 @@
    addListener('click', document.querySelector('a'), () => console.log('...')) // должна добавить указанный обработчик кликов на указанный элемент
  */
 function addListener(eventName, target, fn) {
+    target.addEventListener('click', fn);
 }
 
 /*
@@ -20,6 +21,7 @@ function addListener(eventName, target, fn) {
    removeListener('click', document.querySelector('a'), someHandler) // должна удалить указанный обработчик кликов на указанный элемент
  */
 function removeListener(eventName, target, fn) {
+    target.removeEventListener(eventName, fn);
 }
 
 /*
@@ -31,6 +33,9 @@ function removeListener(eventName, target, fn) {
    skipDefault('click', document.querySelector('a')) // после вызова функции, клики на указанную ссылку не должны приводить к переходу на другую страницу
  */
 function skipDefault(eventName, target) {
+    target.addEventListener(eventName, function (event) {
+        event.preventDefault();
+    });
 }
 
 /*
@@ -42,6 +47,8 @@ function skipDefault(eventName, target) {
    emulateClick(document.querySelector('a')) // для указанного элемента должно быть сэмулировано события click
  */
 function emulateClick(target) {
+    let elem = new Event("click");
+    target.dispatchEvent(elem);
 }
 
 /*
@@ -54,6 +61,11 @@ function emulateClick(target) {
    delegate(document.body, () => console.log('кликнули на button')) // добавит такой обработчик кликов для body, который будет вызывать указанную функцию только если кликнули на кнопку (элемент с тегом button)
  */
 function delegate(target, fn) {
+    target.addEventListener("click", function (event) {
+        if (event.target.tagName === 'BUTTON') {
+            fn();
+        }
+    })
 }
 
 /*
@@ -66,6 +78,14 @@ function delegate(target, fn) {
    once(document.querySelector('button'), () => console.log('обработчик выполнился!')) // добавит такой обработчик кликов для указанного элемента, который вызовется только один раз и затем удалится
  */
 function once(target, fn) {
+    let oneClick = false;
+    target.addEventListener("click", function () {
+        if (oneClick === false) {
+            fn();
+            oneClick = true;
+        }
+        target.removeEventListener("click", fn);
+    })
 }
 
 export {
