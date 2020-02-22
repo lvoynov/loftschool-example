@@ -1,3 +1,4 @@
+'use strict'
 /* ДЗ 6 - Асинхронность и работа с сетью */
 
 /*
@@ -35,20 +36,31 @@ function loadAndSortTowns() {
     return new Promise(function (resolve, reject) {
         fetch('https://raw.githubusercontent.com/smelukov/citiesTest/master/cities.json')
             .then(response => {
-                return response.json();
+                if (response.ok) {
+                    return Promise.resolve(response)
+                } else {
+                    return Promise.reject( new Error((response.statusText)))
+                }
             })
+            .then(response => response.json())
             .then(towns => {
-                let sortTowns = towns.sort(function (a, b) {
-                        if (a.name > b.name) {
-                            return 1;
-                        } else {
-                            return -1;
-                        }
-                    });
-                resolve(sortTowns);
+                let sortTowns = towns.sort((a, b) => {
+                    if (a.name > b.name) {
+                        return 1;
+                    } else if (a.name < b.name){
+                        return -1;
+                    } else {return 0}
+
+                });
+                return  resolve(sortTowns)
             })
-            .catch((e) => reject(e));
+            .catch(function (error) {
+                reject(error)
+                console.log("no")
+            });
+
     })
+
 }
 
 

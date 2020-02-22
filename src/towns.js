@@ -1,4 +1,4 @@
-/*
+ /*
  Страница должна предварительно загрузить список городов из
  https://raw.githubusercontent.com/smelukov/citiesTest/master/cities.json
  и отсортировать в алфавитном порядке.
