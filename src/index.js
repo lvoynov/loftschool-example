@@ -18,7 +18,6 @@ function delayPromise(seconds) {
     });
 }
 
-
 /*
  Задание 2:
 
@@ -58,9 +57,7 @@ function loadAndSortTowns() {
                 reject(error)
                 console.log("no")
             });
-
     })
-
 }
 
 
