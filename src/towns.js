@@ -37,6 +37,32 @@ const homeworkContainer = document.querySelector('#homework-container');
  https://raw.githubusercontent.com/smelukov/citiesTest/master/cities.json
  */
 function loadTowns() {
+    return new Promise(function (resolve, reject) {
+        fetch('https://raw.githubusercontent.com/smelukov/citiesTest/master/cities.json')
+            .then(response => {
+                if (response.ok) {
+                    return Promise.resolve(response)
+                } else {
+                    return Promise.reject( new Error((response.statusText)))
+                }
+            })
+            .then(response => response.json())
+            .then(towns => {
+                let sortTowns = towns.sort((a, b) => {
+                    if (a.name > b.name) {
+                        return 1;
+                    } else if (a.name < b.name){
+                        return -1;
+                    } else {return 0}
+
+                });
+                return  resolve(sortTowns)
+            })
+            .catch(function (error) {
+                reject(error)
+                console.log("no")
+            });
+    })
 }
 
 /*
@@ -51,20 +77,126 @@ function loadTowns() {
    isMatching('Moscow', 'Moscov') // false
  */
 function isMatching(full, chunk) {
+    let regexp = new RegExp(chunk, 'i');
+
+    if (full.search(regexp) > -1) {
+        return true;
+    } else {
+        return false;
+    }
 }
 
 /* Блок с надписью "Загрузка" */
 const loadingBlock = homeworkContainer.querySelector('#loading-block');
+
+
+
 /* Блок с текстовым полем и результатом поиска */
 const filterBlock = homeworkContainer.querySelector('#filter-block');
+filterBlock.getAttribute
+
 /* Текстовое поле для поиска по городам */
 const filterInput = homeworkContainer.querySelector('#filter-input');
+
+
+
 /* Блок с результатами поиска */
 const filterResult = homeworkContainer.querySelector('#filter-result');
 
 filterInput.addEventListener('keyup', function() {
     // это обработчик нажатия кливиш в текстовом поле
 });
+
+ function renderList(list) {
+     for (let item of list) {
+         let fragment = document.createDocumentFragment();
+         let span = document.createElement('span');
+
+         span.innerText = item.name;
+         fragment.appendChild(span);
+         filterResult.appendChild(fragment);
+     }
+ }
+
+ // Функция получения данных с сервера и записи в хранилище
+ const getTownFromServer = async ()=>{
+     try {
+         let res = await loadTowns();
+
+         localStorage.setItem('townList', JSON.stringify(res));
+
+         return res;
+     } catch (e) {
+         console.error(e.message)
+     }
+
+ };
+
+ // Функция получения данных из хранилища
+ const getTownFromStore = ()=>{
+     return JSON.parse(localStorage.getItem('townList'));
+ };
+
+ addEventListener('DOMContentLoaded', async ()=>{
+     try {
+         let res = await getTownFromServer();
+
+         if (res) {
+             renderList(res);
+             loadingBlock.style.display = 'none';
+             filterBlock.style.display = 'block';
+         }
+
+     } catch (e) {
+         loadingBlock.textContent = '';
+         reloader('build');
+
+     }
+ });
+ document.body.addEventListener('click', async (e)=> {
+     if (e.target.classList.contains('button')) {
+         try {
+             let res = await getTownFromStore();
+
+             if (res) {
+                 reloader('destroy');
+                 renderList(res);
+                 loadingBlock.style.display = 'none';
+                 filterBlock.style.display = 'block';
+             }
+
+         } catch (e) {
+             loadingBlock.textContent = '';
+             reloader('build');
+
+         }
+     }
+ });
+
+ filterInput.addEventListener('keyup', async (e)=> {
+     try {
+         loadingBlock.style.display = 'block';
+         let res = await getTownFromStore();
+
+         filterResult.innerHTML = '';
+         let filterRes = [];
+
+         for (let item of res) {
+             if (isMatching(item.name, e.target.value)) {
+                 filterRes.push(item)
+             }
+         }
+         renderList(filterRes);
+         loadingBlock.style.display = 'none';
+
+         if (e.target.value === '') {
+             filterResult.innerHTML = '';
+         }
+     } catch (e) {
+         throw new Error(e.message)
+     }
+
+ });
 
 export {
     loadTowns,
